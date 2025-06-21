@@ -1,51 +1,37 @@
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import { nanoid } from 'nanoid';
+import { Contact } from '../db/Contact.js';
 
-const contactsPath = path.resolve('db', 'contacts.json');
-
-const updateContacts = contacts =>
-  fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-
-async function listContacts() {
-  const contacts = await fs.readFile(contactsPath, 'utf-8');
-  return JSON.parse(contacts);
+function listContacts() {
+  return Contact.findAll();
 }
 
-async function getContactById(contactId) {
-  const contacts = await listContacts();
-  return contacts.find(({ id }) => id === contactId) || null;
+function getContactById(contactId) {
+  return Contact.findByPk(contactId);
 }
 
 async function removeContact(contactId) {
-  const contacts = await listContacts();
-  const idx = contacts.findIndex(({ id }) => id === contactId);
-  if (idx === -1) return null;
-  const [deleteContact] = contacts.splice(idx, 1);
-  await updateContacts(contacts);
-  return deleteContact;
+  const contact = await getContactById(contactId);
+  if (!contact) return null;
+  await contact.destroy();
+  return contact;
 }
 
-async function addContact({ name, email, phone }) {
-  const newContact = {
-    id: nanoid(),
-    name,
-    email,
-    phone,
-  };
-  const contacts = await listContacts();
-  contacts.push(newContact);
-  await updateContacts(contacts);
-  return newContact;
+function addContact(data) {
+  return Contact.create(data);
 }
 
 async function modifyContact(contactId, data) {
-  const contacts = await listContacts();
-  const idx = contacts.findIndex(({ id }) => id === contactId);
-  if (idx === -1) return null;
-  contacts[idx] = { ...contacts[idx], ...data };
-  await updateContacts(contacts);
-  return contacts[idx];
+  const contact = await getContactById(contactId);
+  if (!contact) return null;
+  await contact.update(data);
+  return contact;
+}
+
+async function updateStatusContact(contactId, data) {
+  const contact = await getContactById(contactId);
+  if (!contact) return null;
+
+  await contact.update({ ...contact, ...data });
+  return contact;
 }
 
 export {
@@ -54,4 +40,5 @@ export {
   removeContact,
   addContact,
   modifyContact,
+  updateStatusContact,
 };
