@@ -1,15 +1,22 @@
 import { Contact } from '../db/Contact.js';
 
-function listContacts() {
-  return Contact.findAll();
+function listContacts({ where, skip = 0, limit = 20 }) {
+  return Contact.findAndCountAll({
+    where,
+    offset: Number(skip),
+    limit: Number(limit),
+  });
 }
 
-function getContactById(contactId) {
-  return Contact.findByPk(contactId);
+
+function getContact(query) {
+  return Contact.findOne({
+    where: query,
+  });
 }
 
-async function removeContact(contactId) {
-  const contact = await getContactById(contactId);
+async function removeContact(query) {
+  const contact = await getContact(query);
   if (!contact) return null;
   await contact.destroy();
   return contact;
@@ -19,15 +26,15 @@ function addContact(data) {
   return Contact.create(data);
 }
 
-async function modifyContact(contactId, data) {
-  const contact = await getContactById(contactId);
+async function modifyContact(query, data) {
+  const contact = await getContact(query);
   if (!contact) return null;
   await contact.update(data);
   return contact;
 }
 
-async function updateStatusContact(contactId, data) {
-  const contact = await getContactById(contactId);
+async function updateStatusContact(query, data) {
+  const contact = await getContact(query);
   if (!contact) return null;
 
   await contact.update({ ...contact, ...data });
@@ -36,7 +43,7 @@ async function updateStatusContact(contactId, data) {
 
 export {
   listContacts,
-  getContactById,
+  getContact,
   removeContact,
   addContact,
   modifyContact,
