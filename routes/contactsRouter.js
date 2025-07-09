@@ -7,6 +7,7 @@ import {
 } from '../schemas/contactsSchemas.js';
 
 import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/upload.js';
 
 const contactsRouter = express.Router();
 
@@ -20,6 +21,7 @@ contactsRouter.delete('/:id', contactsControllers.deleteContact);
 
 contactsRouter.post(
   '/',
+  upload.single('image'),
   validateBody(createContactSchema),
   contactsControllers.createContact
 );

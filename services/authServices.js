@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import gravatar from 'gravatar';
 
 import { User } from '../db/User.js';
 import HttpError from '../helpers/HttpError.js';
@@ -11,8 +12,9 @@ function findUser(query) {
 }
 
 async function registerUser(payload) {
+  const avatarURL = gravatar.url(payload.email);
   const hashPassword = await bcrypt.hash(payload.password, 10);
-  return User.create({ ...payload, password: hashPassword });
+  return User.create({ ...payload, avatarURL, password: hashPassword });
 }
 
 async function loginUser({ email, password }) {
@@ -51,4 +53,18 @@ async function modifySubscription(id, data) {
   return { id: user.id, email: user.email, subscription: user.subscription };
 }
 
-export { registerUser, loginUser, findUser, logoutUser, modifySubscription };
+async function modifyUserAvatar(id, avatarURL) {
+  const user = await findUser({ id });
+  if (!user) throw HttpError(401, 'Not authorized');
+  await user.update({ ...user, avatarURL });
+  return { avatarURL };
+}
+
+export {
+  registerUser,
+  loginUser,
+  findUser,
+  logoutUser,
+  modifySubscription,
+  modifyUserAvatar,
+};
