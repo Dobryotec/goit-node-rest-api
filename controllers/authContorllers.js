@@ -5,6 +5,8 @@ import {
   loginUser,
   modifySubscription,
   modifyUserAvatar,
+  verifyUser,
+  resendVerifyEmail,
 } from '../services/authServices.js';
 import { ctrlWrapper } from '../helpers/ctrlWrapper.js';
 import { logoutUser } from '../services/authServices.js';
@@ -19,6 +21,20 @@ const registerController = async (req, res) => {
       email,
       subscription,
     },
+  });
+};
+
+const verifyController = async (req, res) => {
+  const { verificationToken } = req.params;
+  await verifyUser(verificationToken);
+  res.json({ message: 'Verification successful' });
+};
+
+const resendVerifyEmailController = async (req, res) => {
+  const { email } = req.body;
+  await resendVerifyEmail(email);
+  res.json({
+    email: 'Verification email sent',
   });
 };
 
@@ -59,6 +75,8 @@ const updateUserAvatarController = async (req, res) => {
 
 export default {
   registerController: ctrlWrapper(registerController),
+  verifyController: ctrlWrapper(verifyController),
+  resendVerifyEmailController: ctrlWrapper(resendVerifyEmailController),
   loginController: ctrlWrapper(loginController),
   getCurrentContoller: ctrlWrapper(getCurrentContoller),
   logoutController: ctrlWrapper(logoutController),
