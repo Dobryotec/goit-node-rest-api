@@ -9,6 +9,10 @@ export const authSchema = Joi.object({
   token: Joi.string(),
 });
 
+export const authVerifySchema = Joi.object({
+  email: Joi.string().required().email(),
+});
+
 export const updateSubscriptionSchema = Joi.object({
   subscription: Joi.string()
     .valid(...valuesList)
